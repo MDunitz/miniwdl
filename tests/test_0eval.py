@@ -460,3 +460,12 @@ class TestValue(unittest.TestCase):
         # misc functionality
         self.assertEqual(WDL.values_to_json(doc.workflow.required_inputs, ["w"]), {"w.s.who": "String"})
         self.assertEqual(WDL.values_to_json(doc.workflow._type_env), {"s.message": "String"})
+
+class TestEnv2(unittest.TestCase):
+    def test_basic(self):
+        env: WDL.Env2.Base[str] = WDL.Env2.Base()
+        env["foo.bar.baz"] = "bat"
+        self.assertTrue("foo.bar.baz" in env)
+        self.assertEqual(env["foo.bar.baz"], "bat")
+        self.assertSetEqual(env._namespaces, set(["foo", "foo.bar"]))
+        WDL.Env2._test()
