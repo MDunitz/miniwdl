@@ -9,7 +9,7 @@ S = TypeVar("S")
 
 class Base(Generic[T]):
     """
-    ``WDL.Env.Base`` is the polymorphic data structure for an environment mapping names onto some
+    ``WDL.Env.Base`` is the generic data structure for an environment binding names onto some
     associated values. WDL names are unique, and may be prefixed by dot-separated namespaces.
     Bindings in the environment can be added and retrieved using dict-like syntax, except
     attempting to overwrite an existing binding causes a ``Collision`` error. It's possible for an
@@ -47,6 +47,15 @@ class Base(Generic[T]):
         except ValueError:
             pass
         self._items[key] = value
+
+    def bind(self, key: str, value: T) -> "Base[T]":
+        """
+        Copy the environment with an additional binding (leaving ``self`` unchanged)
+        """
+        ans = Base(self._items)
+        ans._namespaces = set(self._namespaces)
+        ans[key] = value
+        return ans
 
     def add_namespace(self, namespace: str, exist_ok: bool = False) -> None:
         """
