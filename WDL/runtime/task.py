@@ -522,7 +522,6 @@ class TaskDockerContainer(TaskContainer):
                         )
                     )
 
-
 def run_local_task(
     task: Tree.Task,
     inputs: Env.Bindings[Value.Base],
@@ -617,6 +616,12 @@ def run_local_task(
 
             outputs = link_outputs(outputs, run_dir)
             write_values_json(outputs, os.path.join(run_dir, "outputs.json"), namespace=task.name)
+            import hashlib
+            with open(os.path.join(run_dir, "inputs.json"), "rb") as file_reader:
+                contents = file_reader.read()
+            inputs_checksum = hashlib.sha256(contents).hexdigest()
+            with open(os.path.join(container.host_dir, "input_cache.json"), "a") as f:
+                json.dump({inputs_checksum: values_to_json(outputs)}, f)
 
             # make sure everything will be accessible to downstream tasks
             chmod_R_plus(container.host_dir, file_bits=0o660, dir_bits=0o770)

@@ -166,7 +166,7 @@ def write_values_json(
 
     with open(filename, "w") as outfile:
         print(
-            json.dumps(values_to_json(values_env, namespace=namespace), indent=2),  # pyre-ignore
+            json.dumps(sorted(values_to_json(values_env, namespace=namespace)), indent=2),  # pyre-ignore
             file=outfile,
         )
 
