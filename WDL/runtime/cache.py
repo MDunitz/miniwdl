@@ -14,7 +14,6 @@ def get_input_cache(key: str, run_dir: str) -> Optional[Env.Bindings[Value.Base]
     """
     Resolve cache key to call outputs, if available, or None.
     """
-    # find file
     try:
         with open(os.path.join(run_dir, f"{key}.json"), "rb") as file_reader:
             contents = file_reader.read()
@@ -37,8 +36,6 @@ def put_input_cache(key: str, run_dir: str, outputs: Env.Bindings[Value.Base]) -
 def get_digest_for_inputs(inputs):
     """
     Return sha256 for json of sorted inputs
-    :param inputs: WDL inputs for the task
-    :return: digest
     """
     json_inputs = json.dumps(sorted(values_to_json(inputs))).encode('utf-8')
     return hashlib.sha256(json_inputs).hexdigest()

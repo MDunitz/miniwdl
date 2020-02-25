@@ -624,8 +624,6 @@ def run_local_task(
 
             outputs = link_outputs(outputs, run_dir)
             write_values_json(outputs, os.path.join(run_dir, "outputs.json"), namespace=task.name)
-            with open(os.path.join(run_dir, "inputs.json"), "rb") as file_reader:
-                contents = file_reader.read()
 
             # make sure everything will be accessible to downstream tasks
             chmod_R_plus(container.host_dir, file_bits=0o660, dir_bits=0o770)
