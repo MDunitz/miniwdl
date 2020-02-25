@@ -3,14 +3,12 @@ Caching outputs of task calls based on inputs.
 """
 import hashlib
 import json
-import logging
 import os
 
-from WDL import Env, Value, Type
+from WDL import Env, Value, values_to_json
+
 from typing import Optional
 
-logger_prefix = "*************************** MADISON"
-logger = logging.getLogger(".".join(logger_prefix))
 
 def get_input_cache(key: str, run_dir: str) -> Optional[Env.Bindings[Value.Base]]:
     """
@@ -29,9 +27,6 @@ def put_input_cache(key: str, run_dir: str, outputs: Env.Bindings[Value.Base]) -
     """
     Store call outputs for future reuse
     """
-    from WDL import values_to_json
-    logger.info(f"MADE IT HERE: {key}")
-    logger.info(os.path.join(run_dir, f"{key}.json"))
     with open(os.path.join(run_dir, f"{key}.json"), "w") as outfile:
         print(
             json.dumps(values_to_json(outputs)),
@@ -45,6 +40,5 @@ def get_digest_for_inputs(inputs):
     :param inputs: WDL inputs for the task
     :return: digest
     """
-    from WDL import values_to_json
     json_inputs = json.dumps(sorted(values_to_json(inputs))).encode('utf-8')
     return hashlib.sha256(json_inputs).hexdigest()

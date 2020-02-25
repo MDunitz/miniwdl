@@ -20,7 +20,6 @@ from abc import ABC, abstractmethod
 from typing import Tuple, List, Dict, Optional, Callable, Iterable, Set, Any
 import docker
 
-from WDL.runtime.cache import get_digest_for_inputs, get_input_cache, put_input_cache
 from .. import Error, Type, Env, Value, StdLib, Tree, _util
 from .._util import (
     write_values_json,
@@ -553,6 +552,8 @@ def run_local_task(
     :param as_me: run container command using the current user uid:gid (may break commands that
                   assume root access, e.g. apt-get)
     """
+
+    from WDL.runtime.cache import get_digest_for_inputs, get_input_cache, put_input_cache
 
     # provision run directory and log file
     run_id = run_id or task.name
