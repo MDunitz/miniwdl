@@ -19,6 +19,8 @@ import re
 from abc import ABC, abstractmethod
 from typing import Tuple, List, Dict, Optional, Callable, Iterable, Set, Any
 import docker
+
+from WDL.runtime.cache import get_digest_for_inputs, get_input_cache, put_input_cache
 from .. import Error, Type, Env, Value, StdLib, Tree, _util
 from .._util import (
     write_values_json,
@@ -555,6 +557,11 @@ def run_local_task(
     # provision run directory and log file
     run_id = run_id or task.name
     run_dir = provision_run_dir(task.name, run_dir)
+    input_digest = get_digest_for_inputs(inputs)
+    cached = get_input_cache(input_digest, run_dir)
+    if cached:
+        return (run_dir, cached)
+
     write_values_json(inputs, os.path.join(run_dir, "inputs.json"))
 
     logger_prefix = (logger_prefix or ["wdl"]) + ["t:" + run_id]
@@ -616,17 +623,14 @@ def run_local_task(
 
             outputs = link_outputs(outputs, run_dir)
             write_values_json(outputs, os.path.join(run_dir, "outputs.json"), namespace=task.name)
-            import hashlib
             with open(os.path.join(run_dir, "inputs.json"), "rb") as file_reader:
                 contents = file_reader.read()
-            inputs_checksum = hashlib.sha256(contents).hexdigest()
-            with open(os.path.join(container.host_dir, "input_cache.json"), "a") as f:
-                json.dump({inputs_checksum: values_to_json(outputs)}, f)
 
             # make sure everything will be accessible to downstream tasks
             chmod_R_plus(container.host_dir, file_bits=0o660, dir_bits=0o770)
 
             logger.notice("done")  # pyre-fixme
+            put_input_cache(input_digest, run_dir, outputs)
             return (run_dir, outputs)
         except Exception as exn:
             logger.debug(traceback.format_exc())
